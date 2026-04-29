@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ internship.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h2>{{ internship.title }}</h2>
+                            <h5 class="text-primary">{{ internship.company }}</h5>
+
+                        </div>
+                        <span class="badge 
+                            {% if internship.internship_type == 'remote' %}bg-info
+                            {% elif internship.internship_type == 'hybrid' %}bg-warning
+                            {% else %}bg-secondary{% endif %} fs-6">
+                            {{ internship.get_internship_type_display }}
+
+                        </span>
+                    </div>
+                    
+                    <!-- Meta Info -->
+                    <div class="d-flex flex-wrap gap-3 text-muted mb-4">
+                        <span><i class="bi bi-geo-alt me-1"></i>{{ internship.location|default:"Location TBD" }}</span>
+                        <span><i class="bi bi-calendar me-1"></i>{{ internship.duration }}</span>
+                        <span><i class="bi bi-clock me-1"></i>Deadline: {{ internship.application_deadline|date:"M d, Y" }}</span>
+
+                        {% if internship.stipend %}
+                        <span class="text-success"><i class="bi bi-currency-dollar me-1"></i>{{ internship.stipend }}/month</span>
+                        {% endif %}
+                    </div>
+                    
+                    <hr>
+                    
+                    <!-- Description -->
+                    <h5>About the Internship</h5>
+                    <p>{{ internship.description|linebreaks }}</p>
+                    
+                    <!-- Requirements -->
+                    {% if internship.requirements %}
+                    <h5 class="mt-4">Requirements</h5>
+                    <p>{{ internship.requirements|linebreaks }}</p>
+                    {% endif %}
+                    
+                    <!-- Contact -->
+                    {% if internship.contact_email %}
+                    <div class="alert alert-info mt-4">
+                        <i class="bi bi-envelope me-2"></i>Contact: {{ internship.contact_email }}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Apply Button -->
+                    <div class="d-grid gap-2 mt-4">
+                        {% if user.is_authenticated %}
+                            {% if has_applied %}
+                            <button class="btn btn-success btn-lg" disabled>
+                                <i class="bi bi-check-lg me-2"></i>Application Submitted
+                            </button>
+                            {% else %}
+                            <a href="{% url 'apply_internship' internship.pk %}" class="btn btn-primary btn-lg">
+                                <i class="bi bi-send me-2"></i>Apply Now
+                            </a>
+                            {% endif %}
+                        {% else %}
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Login to Apply
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'internship_list' %}" class="btn btn-outline-secondary">Back to Listings</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

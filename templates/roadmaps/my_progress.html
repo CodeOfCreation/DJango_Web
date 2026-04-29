@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}My Progress{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="bi bi-graph-up-arrow me-2"></i>My Learning Progress</h2>
+            <p class="text-muted">Track your journey and celebrate milestones</p>
+        </div>
+    </div>
+    
+    <!-- Overall Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card h-100 text-center p-3">
+                <i class="bi bi-list-check display-4 text-primary"></i>
+                <h4 class="mt-2">{{ total_topics }}</h4>
+                <p class="text-muted mb-0">Total Topics</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 text-center p-3">
+                <i class="bi bi-check-circle display-4 text-success"></i>
+                <h4 class="mt-2">{{ completed_topics }}</h4>
+                <p class="text-muted mb-0">Completed</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 text-center p-3">
+                <i class="bi bi-hourglass display-4 text-warning"></i>
+                <h4 class="mt-2">{{ remaining_topics }}</h4>
+                <p class="text-muted mb-0">Remaining</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 text-center p-3">
+                <i class="bi bi-percent display-4 text-info"></i>
+                <h4 class="mt-2">{{ completion_percentage }}%</h4>
+                <p class="text-muted mb-0">Complete</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Left Column: Roadmap Progress -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-map me-2"></i>Progress by Roadmap</h5>
+                </div>
+                <div class="card-body">
+                    {% if roadmap_progress %}
+                    <div class="list-group list-group-flush">
+                        {% for item in roadmap_progress %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">{{ item.roadmap.title }}</h6>
+                                <span class="badge bg-primary">{{ item.percentage }}%</span>
+                            </div>
+                            <div class="progress mb-2">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ item.percentage }}%"></div>
+                            </div>
+                            <small class="text-muted">
+                                {{ item.completed }} of {{ item.total }} topics completed
+                                {% if item.time_remaining %}
+                                · {{ item.time_remaining }} hours remaining
+                                {% endif %}
+                            </small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-compass display-4 text-muted"></i>
+                        <p class="text-muted mt-2">No roadmaps started yet. Explore and start learning!</p>
+                        <a href="{% url 'explore_roadmaps' %}" class="btn btn-primary">Find Roadmaps</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Recently Completed -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recently Completed</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_completed %}
+                    <div class="timeline">
+                        {% for progress in recent_completed %}
+                        <div class="timeline-item completed">
+                            <h6>{{ progress.topic.title }}</h6>
+                            <p class="text-muted small mb-1">{{ progress.topic.roadmap.title }}</p>
+                            <span class="badge bg-success"><i class="bi bi-check-lg me-1"></i>Completed</span>
+                            <small class="text-muted ms-2">{{ progress.completed_at|timesince }} ago</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-3">No topics completed yet. Keep going!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column: Time & Skills -->
+        <div class="col-lg-4">
+            <!-- Time Remaining -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-clock me-2"></i>Time Estimates</h5>
+                </div>
+                <div class="card-body text-center">
+                    <h3 class="text-primary">{{ total_hours_remaining }}</h3>
+                    <p class="text-muted">Hours Remaining</p>
+                    <hr>
+                    <p class="text-muted small">At 10 hours/week study pace:</p>
+                    <h5>{{ weeks_remaining }} weeks</h5>
+                </div>
+            </div>
+            
+            <!-- Skill Domains -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Skill Domains</h5>
+                </div>
+                <div class="card-body">
+                    {% if domain_stats %}
+                    <div class="list-group list-group-flush">
+                        {% for domain, stats in domain_stats.items %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ domain }}</span>
+                            <span class="badge 
+                                {% if stats.percentage >= 75 %}bg-success
+                                {% elif stats.percentage >= 50 %}bg-warning
+                                {% elif stats.percentage >= 25 %}bg-info
+                                {% else %}bg-secondary{% endif %}">
+                                {{ stats.completed }}/{{ stats.total }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-3">Start learning to see domain progress</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

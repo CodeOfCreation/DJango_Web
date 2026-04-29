@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ roadmap.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Roadmap Header -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-secondary me-2">{{ roadmap.career_goal.name }}</span>
+                        <span class="badge 
+                            {% if roadmap.difficulty == 'beginner' %}bg-success
+                            {% elif roadmap.difficulty == 'intermediate' %}bg-warning
+                            {% else %}bg-danger{% endif %}">
+                            {{ roadmap.get_difficulty_display }}
+                        </span>
+                    </div>
+                    <h2>{{ roadmap.title }}</h2>
+                    <p class="text-muted">{{ roadmap.description }}</p>
+                    <div class="d-flex gap-3 text-muted small">
+                        <span><i class="bi bi-clock me-1"></i>{{ roadmap.estimated_duration }}</span>
+                        <span><i class="bi bi-list-check me-1"></i>{{ topics|length }} topics</span>
+                        <span><i class="bi bi-person me-1"></i>By {{ roadmap.created_by.username|default:"NEXTSTEP Team" }}</span>
+                    </div>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    {% if overall_progress is not None %}
+                    <div class="mb-2">
+                        <span class="h4 text-primary">{{ overall_progress }}%</span>
+                        <span class="text-muted">Complete</span>
+                    </div>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ overall_progress }}%"></div>
+                    </div>
+                    {% endif %}
+                    <p class="text-muted small">
+                        <i class="bi bi-clock me-1"></i>Est. {{ total_hours }} hours total
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Budget Filter Alert -->
+    {% if user.is_authenticated and user.profile.budget_mode == 'free_only' %}
+    <div class="alert alert-info">
+        <i class="bi bi-funnel me-2"></i>
+        <strong>Free Resources Only:</strong> Paid resources are hidden based on your preference.
+        <a href="{% url 'profile_edit' %}" class="alert-link">Change</a>
+    </div>
+    {% endif %}
+    
+    <!-- Topics Timeline -->
+    <div class="timeline">
+        {% for topic in topics %}
+        <div class="timeline-item 
+            {% if topic.user_progress and topic.user_progress.is_completed %}completed{% endif %}
+            {% if topic.is_next %}current{% endif %}" 
+            id="topic-{{ topic.id }}">
+            
+            <div class="card mb-3 {% if topic.is_milestone %}border-warning{% endif %}">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-secondary me-2">#{{ topic.order }}</span>
+                                {% if topic.is_milestone %}
+                                <span class="badge bg-warning text-dark me-2"><i class="bi bi-flag me-1"></i>Milestone</span>
+                                {% endif %}
+                                <span class="badge bg-info">{{ topic.get_domain_display }}</span>
+                            </div>
+                            
+                            <h5 class="card-title">{{ topic.title }}</h5>
+                            <p class="text-muted small">{{ topic.description }}</p>
+                            
+                            <div class="d-flex gap-2 text-muted small mb-3">
+                                <span><i class="bi bi-clock me-1"></i>{{ topic.estimated_time }}</span>
+                                <span><i class="bi bi-hourglass me-1"></i>{{ topic.estimated_hours }} hours</span>
+                                {% if topic.prerequisites.exists %}
+                                <span><i class="bi bi-diagram-2 me-1"></i>{{ topic.prerequisites.count }} prerequisites</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 text-md-end">
+                            {% if user.is_authenticated %}
+                                {% if topic.user_progress and topic.user_progress.is_completed %}
+                                <button class="btn btn-success btn-sm" disabled>
+                                    <i class="bi bi-check-lg me-1"></i>Completed
+                                </button>
+                                {% else %}
+                                <button class="btn btn-outline-primary btn-sm mark-complete-btn" 
+                                        data-topic-id="{{ topic.id }}"
+                                        onclick="markTopicComplete({{ topic.id }})">
+                                    <i class="bi bi-check-circle me-1"></i>Mark Complete
+                                </button>
+                                {% endif %}
+                            {% else %}
+                            <a href="{% url 'login' %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>Login to Track
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Resources -->
+                    {% if topic.filtered_resources %}
+                    <div class="mt-3">
+                        <h6 class="text-muted small text-uppercase mb-2">Resources</h6>
+                        <div class="row g-2">
+                            {% for resource in topic.filtered_resources %}
+                            <div class="col-md-6">
+                                <div class="card resource-card {% if resource.resource_type == 'paid' %}paid{% endif %}">
+                                    <div class="card-body p-2">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="card-title mb-1">{{ resource.title }}</h6>
+                                                <p class="text-muted small mb-1">{{ resource.description|truncatewords:10 }}</p>
+                                                <div class="d-flex gap-1">
+                                                    <span class="badge {% if resource.resource_type == 'free' %}bg-success{% else %}bg-primary{% endif %} badge-sm">
+                                                        {{ resource.get_resource_type_display }}
+                                                    </span>
+                                                    <span class="badge bg-secondary badge-sm">{{ resource.get_platform_display }}</span>
+                                                    {% if resource.is_verified %}
+                                                    <span class="badge bg-info badge-sm"><i class="bi bi-check-circle me-1"></i>Verified</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="text-end ms-2">
+                                                {% if resource.price %}
+                                                <span class="badge bg-dark">${{ resource.price }}</span>
+                                                {% endif %}
+                                                <a href="{{ resource.url }}" target="_blank" class="btn btn-sm btn-outline-primary mt-1">
+                                                    <i class="bi bi-box-arrow-up-right"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- User Notes -->
+                    {% if topic.user_progress and topic.user_progress.notes %}
+                    <div class="mt-2 p-2 bg-light rounded">
+                        <small class="text-muted"><i class="bi bi-sticky me-1"></i>Your Notes:</small>
+                        <p class="small mb-0">{{ topic.user_progress.notes }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function markTopicComplete(topicId) {
+    fetch(`/roadmaps/topic/${topicId}/complete/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const topicElement = document.getElementById(`topic-${topicId}`);
+            topicElement.classList.add('completed');
+            topicElement.classList.remove('current');
+            
+            const btn = topicElement.querySelector('.mark-complete-btn');
+            if (btn) {
+                btn.outerHTML = '<button class="btn btn-success btn-sm" disabled><i class="bi bi-check-lg me-1"></i>Completed</button>';
+            }
+            
+            // Refresh to update progress
+            setTimeout(() => location.reload(), 500);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
+{% endblock %}
+{% endblock %}

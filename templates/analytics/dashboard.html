@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics Dashboard{% endblock %}
+
+{% block content %}
+<div class="container" x-data="analyticsData()" x-init="loadData()">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="bi bi-bar-chart-line me-2"></i>Analytics Dashboard</h2>
+            <p class="text-muted">Visualize your learning progress and achievements</p>
+        </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card h-100 text-center p-3">
+                <i class="bi bi-list-check display-4 text-primary"></i>
+                <h4 class="mt-2" x-text="stats.total_topics">--</h4>
+                <p class="text-muted mb-0">Total Topics</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 text-center p-3">
+                <i class="bi bi-check-circle display-4 text-success"></i>
+                <h4 class="mt-2" x-text="stats.completed">--</h4>
+                <p class="text-muted mb-0">Completed</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 text-center p-3">
+                <i class="bi bi-hourglass display-4 text-warning"></i>
+                <h4 class="mt-2" x-text="stats.remaining">--</h4>
+                <p class="text-muted mb-0">Remaining</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 text-center p-3">
+                <i class="bi bi-percent display-4 text-info"></i>
+                <h4 class="mt-2" x-text="stats.percentage + '%'">--</h4>
+                <p class="text-muted mb-0">Complete</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Progress Chart -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Progress Overview</h5>
+                </div>
+                <div class="card-body text-center">
+                    <img :src="'{% url 'progress_chart' %}?t=' + Date.now()" 
+                         alt="Progress Chart" 
+                         class="img-fluid"
+                         style="max-height: 300px;">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Skill Heatmap -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-grid-3x3 me-2"></i>Skill Heatmap</h5>
+                </div>
+                <div class="card-body text-center">
+                    <img :src="'{% url 'skill_heatmap' %}?t=' + Date.now()" 
+                         alt="Skill Heatmap" 
+                         class="img-fluid"
+                         style="max-height: 300px;">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Time Remaining -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Time Estimates</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 border-end">
+                            <h3 class="text-primary" x-text="timeRemaining.hours">--</h3>
+                            <p class="text-muted mb-0">Hours Remaining</p>
+                        </div>
+                        <div class="col-6">
+                            <h3 class="text-success" x-text="timeRemaining.weeks">--</h3>
+                            <p class="text-muted mb-0">Weeks at 10h/week</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Achievements</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-around text-center">
+                        <div>
+                            <i class="bi bi-star-fill display-5 text-warning"></i>
+                            <p class="text-muted small mt-2 mb-0">First Step</p>
+                        </div>
+                        <div>
+                            <i class="bi bi-lightning-fill display-5 text-info"></i>
+                            <p class="text-muted small mt-2 mb-0">Quick Learner</p>
+                        </div>
+                        <div>
+                            <i class="bi bi-award-fill display-5 text-success"></i>
+                            <p class="text-muted small mt-2 mb-0">Halfway</p>
+                        </div>
+                        <div>
+                            <i class="bi bi-gem display-5 text-primary"></i>
+                            <p class="text-muted small mt-2 mb-0">Master</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Domain Breakdown -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Domain Progress</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <template x-for="(domain, name) in domains" :key="name">
+                    <div class="col-md-4">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span x-text="name.charAt(0).toUpperCase() + name.slice(1)"></span>
+                            <span x-text="domain.percentage + '%'"></span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" 
+                                 :class="domain.percentage >= 75 ? 'bg-success' : domain.percentage >= 50 ? 'bg-warning' : domain.percentage >= 25 ? 'bg-info' : 'bg-secondary'"
+                                 :style="'width: ' + domain.percentage + '%'"></div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function analyticsData() {
+    return {
+        stats: {
+            total_topics: 0,
+            completed: 0,
+            remaining: 0,
+            percentage: 0
+        },
+        timeRemaining: {
+            hours: 0,
+            weeks: 0
+        },
+        domains: {},
+        
+        loadData() {
+            // Fetch progress data
+            fetch('/analytics/progress/')
+                .then(r => r.json())
+                .then(data => {
+                    this.stats = data;
+                });
+            
+            // Fetch time remaining
+            fetch('/analytics/time-remaining/')
+                .then(r => r.json())
+                .then(data => {
+                    this.timeRemaining = data;
+                });
+            
+            // Fetch domain stats
+            fetch('/analytics/domains/')
+                .then(r => r.json())
+                .then(data => {
+                    this.domains = data;
+                });
+        }
+    }
+}
+</script>
+{% endblock %}

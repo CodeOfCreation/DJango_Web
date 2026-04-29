@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}Explore Roadmaps{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-map me-2"></i>Explore Roadmaps</h2>
+            <p class="text-muted">Find the perfect learning path for your career goal</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            {% if user.is_staff or user.profile.is_mentor %}
+            <a href="{% url 'create_roadmap' %}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-2"></i>Create Roadmap
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="filter-section">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control" placeholder="Search roadmaps..." value="{{ request.GET.q }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="career_goal" class="form-select">
+                    <option value="">All Career Goals</option>
+                    {% for goal in career_goals %}
+                    <option value="{{ goal.slug }}" {% if request.GET.career_goal == goal.slug %}selected{% endif %}>
+                        {{ goal.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="difficulty" class="form-select">
+                    <option value="">All Difficulties</option>
+                    <option value="beginner" {% if request.GET.difficulty == 'beginner' %}selected{% endif %}>Beginner</option>
+                    <option value="intermediate" {% if request.GET.difficulty == 'intermediate' %}selected{% endif %}>Intermediate</option>
+                    <option value="advanced" {% if request.GET.difficulty == 'advanced' %}selected{% endif %}>Advanced</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Budget Mode Indicator -->
+    {% if user.is_authenticated %}
+    <div class="alert alert-info d-flex align-items-center mb-4">
+        <i class="bi bi-info-circle me-2"></i>
+        <div>
+            <strong>Budget Mode:</strong> 
+            {% if user.profile.budget_mode == 'free_only' %}
+            Showing free resources only. <a href="{% url 'profile_edit' %}" class="alert-link">Change preference</a>
+            {% else %}
+            Showing both free and paid resources. <a href="{% url 'profile_edit' %}" class="alert-link">Change preference</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Roadmaps Grid -->
+    <div class="row g-4">
+        {% for roadmap in roadmaps %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-secondary">{{ roadmap.career_goal.name }}</span>
+                        <span class="badge 
+                            {% if roadmap.difficulty == 'beginner' %}bg-success
+                            {% elif roadmap.difficulty == 'intermediate' %}bg-warning
+                            {% else %}bg-danger{% endif %}">
+                            {{ roadmap.get_difficulty_display }}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ roadmap.title }}</h5>
+                    <p class="card-text text-muted small">{{ roadmap.description|truncatewords:20 }}</p>
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="text-muted small">
+                            <i class="bi bi-clock me-1"></i>{{ roadmap.estimated_duration }}
+                        </span>
+                        <span class="text-muted small">
+                            <i class="bi bi-list-check me-1"></i>{{ roadmap.topic_count }} topics
+                        </span>
+                    </div>
+                    
+                    {% if roadmap.user_progress %}
+                    <div class="mt-3">
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {{ roadmap.completion_percentage }}%"></div>
+                        </div>
+                        <small class="text-muted">{{ roadmap.completion_percentage }}% complete</small>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-white border-top-0">
+                    <a href="{{ roadmap.get_absolute_url }}" class="btn btn-primary w-100">
+                        <i class="bi bi-eye me-2"></i>View Roadmap
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-map display-1 text-muted"></i>
+            <p class="text-muted mt-3">No roadmaps found matching your criteria.</p>
+            <a href="{% url 'explore_roadmaps' %}" class="btn btn-primary">Clear Filters</a>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.career_goal %}&career_goal={{ request.GET.career_goal }}{% endif %}{% if request.GET.difficulty %}&difficulty={{ request.GET.difficulty }}{% endif %}">Previous</a>
+            </li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.career_goal %}&career_goal={{ request.GET.career_goal }}{% endif %}{% if request.GET.difficulty %}&difficulty={{ request.GET.difficulty }}{% endif %}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.career_goal %}&career_goal={{ request.GET.career_goal }}{% endif %}{% if request.GET.difficulty %}&difficulty={{ request.GET.difficulty }}{% endif %}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

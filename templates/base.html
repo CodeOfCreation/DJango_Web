@@ -1,0 +1,179 @@
+ <!DOCTYPE html>
+<html lang="en" x-data="{ mobileMenuOpen: false, userDropdownOpen: false }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NEXTSTEP{% endblock %} | Your Learning Journey</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/nextstep.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{% url 'home' %}">
+                <i class="bi bi-compass-fill me-2"></i>NEXTSTEP
+            </a>
+            
+            <button class="navbar-toggler" type="button" @click="mobileMenuOpen = !mobileMenuOpen">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" :class="{ 'show': mobileMenuOpen }">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">
+                            <i class="bi bi-house-door me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'explore_roadmaps' %}">
+                            <i class="bi bi-map me-1"></i>Roadmaps
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'article_list' %}">
+                            <i class="bi bi-journal-text me-1"></i>Articles
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'internship_list' %}">
+                            <i class="bi bi-briefcase me-1"></i>Internships
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'job_list' %}">
+                            <i class="bi bi-building me-1"></i>Jobs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'community_list' %}">
+                            <i class="bi bi-people me-1"></i>Communities
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown" @click.outside="userDropdownOpen = false">
+                        <a class="nav-link dropdown-toggle" href="#" @click.prevent="userDropdownOpen = !userDropdownOpen">
+                            <i class="bi bi-person-circle me-1"></i>{{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" :class="{ 'show': userDropdownOpen }">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'dashboard' %}">
+                                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'analytics_dashboard' %}">
+                                    <i class="bi bi-graph-up me-2"></i>Analytics
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'profile_edit' %}">
+                                    <i class="bi bi-person me-2"></i>Profile
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'my_progress' %}">
+                                    <i class="bi bi-check2-square me-2"></i>My Progress
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'logout' %}">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Sign Out
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-outline-light btn-sm ms-2 px-3" href="{% url 'register' %}">
+                            Sign Up
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Messages -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Main Content -->
+    <main class="py-4">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-5 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h5 class="fw-bold"><i class="bi bi-compass-fill me-2"></i>NEXTSTEP</h5>
+                    <p class="text-muted">Democratizing access to quality technical education. Your personalized learning journey starts here.</p>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <h6>Learn</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'explore_roadmaps' %}" class="text-muted text-decoration-none">Roadmaps</a></li>
+                        <li><a href="{% url 'article_list' %}" class="text-muted text-decoration-none">Articles</a></li>
+                        <li><a href="{% url 'internship_list' %}" class="text-muted text-decoration-none">Internships</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <h6>Connect</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'community_list' %}" class="text-muted text-decoration-none">Communities</a></li>
+                        <li><a href="{% url 'job_list' %}" class="text-muted text-decoration-none">Jobs</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6>Stay Updated</h6>
+                    <p class="text-muted small">Get notified about new roadmaps and opportunities.</p>
+                    <div class="input-group">
+                        <input type="email" class="form-control" placeholder="Enter your email">
+                        <button class="btn btn-primary" type="button">Subscribe</button>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center text-muted small">
+                <p> NEXTSTEP. Built for learners, by learners.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

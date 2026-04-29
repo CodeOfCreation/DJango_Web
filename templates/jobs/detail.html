@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h2>{{ job.title }}</h2>
+                            <h5 class="text-primary">{{ job.company }}</h5>
+
+                        </div>
+                        <span class="badge 
+                            {% if job.job_type == 'full_time' %}bg-primary
+                            {% elif job.job_type == 'part_time' %}bg-info
+                            {% elif job.job_type == 'contract' %}bg-warning
+                            {% else %}bg-secondary{% endif %} fs-6">
+                            {{ job.get_job_type_display }}
+                        </span>
+                    </div>
+                    
+                    <!-- Meta Info -->
+                    <div class="d-flex flex-wrap gap-3 text-muted mb-4">
+                        <span><i class="bi bi-geo-alt me-1"></i>{{ job.location|default:"Remote" }}</span>
+                        <span><i class="bi bi-bar-chart me-1"></i>{{ job.get_experience_level_display }}</span>
+                        {% if job.salary_min and job.salary_max %}
+                        <span class="text-success"><i class="bi bi-currency-dollar me-1"></i>{{ job.salary_min }} - {{ job.salary_max }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if job.skills_required %}
+                    <div class="mb-4">
+                        <h6>Skills Required</h6>
+                        {% for skill in job.get_skills_list %}
+
+                        <span class="badge bg-secondary me-1">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <!-- Description -->
+                    <h5>Job Description</h5>
+                    <p>{{ job.description|linebreaks }}</p>
+                    
+                    <!-- Requirements -->
+                    {% if job.requirements %}
+                    <h5 class="mt-4">Requirements</h5>
+                    <p>{{ job.requirements|linebreaks }}</p>
+                    {% endif %}
+                    
+                    <!-- Benefits -->
+                    {% if job.benefits %}
+                    <h5 class="mt-4">Benefits</h5>
+                    <p>{{ job.benefits|linebreaks }}</p>
+                    {% endif %}
+                    
+                    <!-- Contact -->
+                    {% if job.contact_email %}
+                    <div class="alert alert-info mt-4">
+                        <i class="bi bi-envelope me-2"></i>Contact: {{ job.contact_email }}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Apply Button -->
+                    <div class="d-grid gap-2 mt-4">
+                        {% if user.is_authenticated %}
+                            {% if has_applied %}
+                            <button class="btn btn-success btn-lg" disabled>
+                                <i class="bi bi-check-lg me-2"></i>Application Submitted
+                            </button>
+                            {% else %}
+                            <a href="{% url 'apply_job' job.pk %}" class="btn btn-primary btn-lg">
+                                <i class="bi bi-send me-2"></i>Apply Now
+                            </a>
+                            {% endif %}
+                        {% else %}
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Login to Apply
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'job_list' %}" class="btn btn-outline-secondary">Back to Listings</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

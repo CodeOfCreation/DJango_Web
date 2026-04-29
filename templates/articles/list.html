@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block title %}Articles & Tutorials{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-journal-text me-2"></i>Articles & Tutorials</h2>
+            <p class="text-muted">Curated content to accelerate your learning</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            {% if user.is_authenticated %}
+            <a href="{% url 'article_create' %}" class="btn btn-primary">
+                <i class="bi bi-pencil me-2"></i>Write Article
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="filter-section">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control" placeholder="Search articles..." value="{{ request.GET.q }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.slug }}" {% if request.GET.category == cat.slug %}selected{% endif %}>
+                        {{ cat.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="difficulty" class="form-select">
+                    <option value="">All Levels</option>
+                    <option value="beginner" {% if request.GET.difficulty == 'beginner' %}selected{% endif %}>Beginner</option>
+                    <option value="intermediate" {% if request.GET.difficulty == 'intermediate' %}selected{% endif %}>Intermediate</option>
+                    <option value="advanced" {% if request.GET.difficulty == 'advanced' %}selected{% endif %}>Advanced</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Featured Articles -->
+    {% if featured_articles and not request.GET.q and not request.GET.category and not request.GET.difficulty %}
+    <div class="mb-4">
+        <h5 class="mb-3"><i class="bi bi-star-fill me-2 text-warning"></i>Featured</h5>
+        <div class="row g-4">
+            {% for article in featured_articles %}
+            <div class="col-md-6">
+                <div class="card h-100">
+                    {% if article.thumbnail %}
+                    <img src="{{ article.thumbnail.url }}" class="card-img-top" style="height: 180px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body">
+                        <div class="d-flex gap-2 mb-2">
+                            <span class="badge bg-primary">{{ article.category.name }}</span>
+                            <span class="badge 
+                                {% if article.difficulty == 'beginner' %}bg-success
+                                {% elif article.difficulty == 'intermediate' %}bg-warning
+                                {% else %}bg-danger{% endif %}">
+                                {{ article.get_difficulty_display }}
+                            </span>
+                        </div>
+                        <h5 class="card-title">{{ article.title }}</h5>
+                        <p class="card-text text-muted">{{ article.excerpt|truncatewords:20 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="bi bi-person me-1"></i>{{ article.author.username }}
+                                <i class="bi bi-clock ms-2 me-1"></i>{{ article.reading_time }} min read
+                            </small>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white">
+                        <a href="{{ article.get_absolute_url }}" class="btn btn-outline-primary btn-sm">Read More</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- All Articles -->
+    <div class="row g-4">
+        {% for article in articles %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                {% if article.thumbnail %}
+                <img src="{{ article.thumbnail.url }}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <div class="d-flex gap-2 mb-2">
+                        <span class="badge bg-secondary">{{ article.category.name }}</span>
+                        <span class="badge 
+                            {% if article.difficulty == 'beginner' %}bg-success
+                            {% elif article.difficulty == 'intermediate' %}bg-warning
+                            {% else %}bg-danger{% endif %}">
+                            {{ article.get_difficulty_display }}
+                        </span>
+                    </div>
+                    <h5 class="card-title">{{ article.title }}</h5>
+                    <p class="card-text text-muted small">{{ article.excerpt|truncatewords:15 }}</p>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="bi bi-clock me-1"></i>{{ article.reading_time }} min
+                            <i class="bi bi-eye ms-2 me-1"></i>{{ article.views_count }}
+                        </small>
+                        <a href="{{ article.get_absolute_url }}" class="btn btn-sm btn-primary">Read</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-journal-x display-1 text-muted"></i>
+            <p class="text-muted mt-3">No articles found matching your criteria.</p>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.difficulty %}&difficulty={{ request.GET.difficulty }}{% endif %}">Previous</a>
+            </li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.difficulty %}&difficulty={{ request.GET.difficulty }}{% endif %}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.difficulty %}&difficulty={{ request.GET.difficulty }}{% endif %}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

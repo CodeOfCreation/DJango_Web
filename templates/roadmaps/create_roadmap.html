@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Create Roadmap{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Create New Roadmap</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" id="roadmap-form">
+                        {% csrf_token %}
+                        
+                        <h5 class="mb-3">Roadmap Details</h5>
+                        {{ roadmap_form|crispy }}
+                        
+                        <hr class="my-4">
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Topics</h5>
+                            <button type="button" class="btn btn-sm btn-success" onclick="addTopic()">
+                                <i class="bi bi-plus-lg me-1"></i>Add Topic
+                            </button>
+                        </div>
+                        
+                        <div id="topics-container">
+                            <!-- Topics will be added here dynamically -->
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-lg me-2"></i>Create Roadmap
+                            </button>
+                            <a href="{% url 'explore_roadmaps' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let topicCount = 0;
+
+function addTopic() {
+    topicCount++;
+    const container = document.getElementById('topics-container');
+    
+    const topicHtml = `
+        <div class="card mb-3 topic-card" id="topic-${topicCount}">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0">Topic #${topicCount}</h6>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removeTopic(${topicCount})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Title</label>
+                        <input type="text" name="topic_title_${topicCount}" class="form-control" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Order</label>
+                        <input type="number" name="topic_order_${topicCount}" class="form-control" value="${topicCount}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Domain</label>
+                        <select name="topic_domain_${topicCount}" class="form-select">
+                            <option value="coding">Coding</option>
+                            <option value="math">Mathematics</option>
+                            <option value="stats">Statistics</option>
+                            <option value="tools">Tools</option>
+                            <option value="theory">Theory</option>
+                            <option value="practical">Practical</option>
+                            <option value="soft_skills">Soft Skills</option>
+                            <option value="domain_knowledge">Domain Knowledge</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Description</label>
+                        <textarea name="topic_description_${topicCount}" class="form-control" rows="2" required></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Estimated Time</label>
+                        <input type="text" name="topic_estimated_time_${topicCount}" class="form-control" placeholder="e.g., 2 weeks" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Estimated Hours</label>
+                        <input type="number" name="topic_estimated_hours_${topicCount}" class="form-control" value="10" required>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input type="checkbox" name="topic_milestone_${topicCount}" class="form-check-input" id="milestone-${topicCount}">
+                            <label class="form-check-label" for="milestone-${topicCount}">Major Milestone</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', topicHtml);
+}
+
+function removeTopic(id) {
+    const topic = document.getElementById(`topic-${id}`);
+    if (topic) {
+        topic.remove();
+    }
+}
+
+// Add first topic by default
+document.addEventListener('DOMContentLoaded', function() {
+    addTopic();
+});
+</script>
+{% endblock %}

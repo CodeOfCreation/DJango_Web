@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Communities{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-people me-2"></i>Explore Communities</h2>
+            <p class="text-muted">Connect with peers and join study groups</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            {% if user.is_authenticated %}
+            <a href="{% url 'create_community' %}" class="btn btn-primary me-2">
+                <i class="bi bi-plus-lg me-2"></i>Create Community
+            </a>
+            <a href="{% url 'find_study_buddies' %}" class="btn btn-success">
+                <i class="bi bi-person-hearts me-2"></i>Find Buddies
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="filter-section">
+        <form method="get" class="row g-3">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control" placeholder="Search communities..." value="{{ request.GET.q }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if request.GET.category == cat.id|stringformat:'s' %}selected{% endif %}>
+                        {{ cat.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="my_communities" class="form-select">
+                    <option value="">All</option>
+                    <option value="true" {% if request.GET.my_communities == 'true' %}selected{% endif %}>My Communities</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Communities Grid -->
+    <div class="row g-4">
+        {% for community in communities %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                {% if community.cover_image %}
+                <img src="{{ community.cover_image.url }}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge bg-primary">{{ community.category.name }}</span>
+                        <span class="badge bg-light text-dark">
+                            <i class="bi bi-people me-1"></i>{{ community.members_count }}
+                        </span>
+                    </div>
+                    <h5 class="card-title">{{ community.name }}</h5>
+                    <p class="text-muted small">{{ community.description|truncatewords:15 }}</p>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="bi bi-chat me-1"></i>{{ community.discussions_count }} discussions
+                        </small>
+                        {% if user.is_authenticated %}
+                            {% if community.is_member %}
+                            <a href="{{ community.get_absolute_url }}" class="btn btn-sm btn-success">Joined</a>
+                            {% else %}
+                            <form method="post" action="{% url 'join_community' community.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-primary">Join</button>
+                            </form>
+                            {% endif %}
+                        {% else %}
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-sm btn-primary">Join</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-people display-1 text-muted"></i>
+            <p class="text-muted mt-3">No communities found matching your criteria.</p>
+            {% if user.is_authenticated %}
+            <a href="{% url 'create_community' %}" class="btn btn-primary">Create First Community</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Previous</a>
+            </li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

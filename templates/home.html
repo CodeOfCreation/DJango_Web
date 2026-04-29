@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Stop Searching.<br>Start Learning.</h1>
+                <p class="lead mb-4">
+                    NEXTSTEP eliminates analysis paralysis by providing personalized, step-by-step learning roadmaps 
+                    with curated free and paid resources. Your career in tech starts here.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'explore_roadmaps' %}" class="btn btn-light btn-lg px-4">
+                        <i class="bi bi-compass me-2"></i>Explore Roadmaps
+                    </a>
+                    <a href="{% url 'register' %}" class="btn btn-outline-light btn-lg px-4">
+                        Get Started Free
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="bi bi-rocket-takeoff display-1 opacity-75"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 col-6 mb-3">
+                <div class="stat-card">
+                    <div class="stat-value" x-data="{ count: 0 }" x-init="setInterval(() => { if(count < 50) count++ }, 30)">
+                        <span x-text="count"></span>+
+                    </div>
+                    <div class="stat-label">Career Roadmaps</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="stat-card">
+                    <div class="stat-value" x-data="{ count: 0 }" x-init="setInterval(() => { if(count < 500) count++ }, 3)">
+                        <span x-text="count"></span>+
+                    </div>
+                    <div class="stat-label">Curated Resources</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="stat-card">
+                    <div class="stat-value" x-data="{ count: 0 }" x-init="setInterval(() => { if(count < 10000) count++ }, 0.15)">
+                        <span x-text="count"></span>+
+                    </div>
+                    <div class="stat-label">Students Helped</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="stat-card">
+                    <div class="stat-value" x-data="{ count: 0 }" x-init="setInterval(() => { if(count < 95) count++ }, 15)">
+                        <span x-text="count"></span>%
+                    </div>
+                    <div class="stat-label">Free Resources</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2>Everything You Need to Succeed</h2>
+            <p class="text-muted">A complete ecosystem for your technical education journey</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon"><i class="bi bi-map"></i></div>
+                    <h4>Structured Roadmaps</h4>
+                    <p class="text-muted">Step-by-step learning paths from beginner to advanced, with clear milestones and prerequisites.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon"><i class="bi bi-currency-dollar"></i></div>
+                    <h4>Budget-Friendly</h4>
+                    <p class="text-muted">Every topic includes both free and paid options. Learn within your budget without sacrificing quality.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                    <h4>Progress Tracking</h4>
+                    <p class="text-muted">Visual analytics show your completion rate, skill heatmaps, and estimated time to goal.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon"><i class="bi bi-journal-text"></i></div>
+                    <h4>Articles & Tutorials</h4>
+                    <p class="text-muted">Curated articles and tutorials to supplement your learning from the community and experts.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon"><i class="bi bi-briefcase"></i></div>
+                    <h4>Career Opportunities</h4>
+                    <p class="text-muted">Find internships and jobs that match your skills and career goals. Apply directly through the platform.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon"><i class="bi bi-people"></i></div>
+                    <h4>Community Support</h4>
+                    <p class="text-muted">Join study groups, find study buddies on the same roadmap, and collaborate with peers.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2>How NEXTSTEP Works</h2>
+            <p class="text-muted">Four simple steps to accelerate your learning</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-3 text-center">
+                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <h3 class="m-0">1</h3>
+                </div>
+                <h5>Choose Your Goal</h5>
+                <p class="text-muted small">Select from Data Science, Web Dev, AI/ML, and more career paths.</p>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <h3 class="m-0">2</h3>
+                </div>
+                <h5>Get Your Roadmap</h5>
+                <p class="text-muted small">Receive a personalized step-by-step learning path with curated resources.</p>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <h3 class="m-0">3</h3>
+                </div>
+                <h5>Track Progress</h5>
+                <p class="text-muted small">Mark topics complete, visualize your growth, and stay motivated.</p>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <h3 class="m-0">4</h3>
+                </div>
+                <h5>Land Opportunities</h5>
+                <p class="text-muted small">Apply to internships and jobs, connect with mentors and peers.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Career Goals Preview -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2>Popular Career Paths</h2>
+            <p class="text-muted">Choose from in-demand technical roles</p>
+        </div>
+        
+        <div class="row g-4" x-data="{ goals: [
+            {name: 'Data Science', icon: 'bi-bar-chart', desc: 'Analyze data, build models, drive decisions'},
+            {name: 'Web Development', icon: 'bi-globe', desc: 'Build modern web applications'},
+            {name: 'AI & Machine Learning', icon: 'bi-cpu', desc: 'Create intelligent systems and algorithms'},
+            {name: 'Cloud & DevOps', icon: 'bi-cloud', desc: 'Deploy and scale infrastructure'}
+        ]}">
+            <template x-for="goal in goals" :key="goal.name">
+                <div class="col-md-3">
+                    <div class="card h-100 text-center p-4">
+                        <i class="bi" :class="goal.icon" style="font-size: 3rem; color: var(--primary-color);"></i>
+                        <h5 class="mt-3" x-text="goal.name"></h5>
+                        <p class="text-muted small" x-text="goal.desc"></p>
+                        <a href="{% url 'explore_roadmaps' %}" class="btn btn-outline-primary btn-sm mt-auto">View Roadmaps</a>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="mb-3">Ready to Start Your Journey?</h2>
+        <p class="lead mb-4">Join thousands of students who have found their path with NEXTSTEP.</p>
+        <a href="{% url 'register' %}" class="btn btn-light btn-lg px-5">Create Free Account</a>
+    </div>
+</section>
+{% endblock %}

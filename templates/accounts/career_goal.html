@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Choose Your Career Goal{% endblock %}
+
+{% block content %}
+<div class="container" x-data="{ 
+    step: 1, 
+    selectedGoal: null,
+    budgetMode: 'free_and_paid',
+    learningStyle: 'mixed'
+}">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <!-- Progress Steps -->
+            <div class="d-flex justify-content-center mb-5">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                         style="width: 40px; height: 40px;" 
+                         :class="step >= 1 ? 'bg-primary text-white' : 'bg-light text-muted'">
+                        <i class="bi bi-bullseye"></i>
+                    </div>
+                    <div class="mx-3" style="width: 60px; height: 2px;" :class="step >= 2 ? 'bg-primary' : 'bg-light'"></div>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                         style="width: 40px; height: 40px;" 
+                         :class="step >= 2 ? 'bg-primary text-white' : 'bg-light text-muted'">
+                        <i class="bi bi-currency-dollar"></i>
+                    </div>
+                    <div class="mx-3" style="width: 60px; height: 2px;" :class="step >= 3 ? 'bg-primary' : 'bg-light'"></div>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                         style="width: 40px; height: 40px;" 
+                         :class="step >= 3 ? 'bg-primary text-white' : 'bg-light text-muted'">
+                        <i class="bi bi-gear"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <!-- Step 1: Career Goal -->
+                    <div x-show="step === 1" x-transition>
+                        <div class="text-center mb-4">
+                            <h3>What do you want to become?</h3>
+                            <p class="text-muted">Select a career path to get your personalized roadmap</p>
+                        </div>
+                        
+                        <div class="row g-4">
+                            {% for goal in career_goals %}
+                            <div class="col-md-4">
+                                <div class="card h-100 cursor-pointer transition-all"
+                                     :class="selectedGoal === {{ goal.id }} ? 'border-primary shadow' : 'border-light'"
+                                     @click="selectedGoal = {{ goal.id }}">
+                                    <div class="card-body text-center p-4">
+                                        <i class="bi {{ goal.icon }} display-4" :class="selectedGoal === {{ goal.id }} ? 'text-primary' : 'text-muted'"></i>
+                                        <h5 class="mt-3">{{ goal.name }}</h5>
+                                        <p class="text-muted small">{{ goal.description|truncatewords:15 }}</p>
+                                        <div x-show="selectedGoal === {{ goal.id }}">
+                                            <i class="bi bi-check-circle-fill text-success"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: Budget Preference -->
+                    <div x-show="step === 2" x-transition x-cloak>
+                        <div class="text-center mb-4">
+                            <h3>What's your budget?</h3>
+                            <p class="text-muted">We'll filter resources based on your preference</p>
+                        </div>
+                        
+                        <div class="row g-4 justify-content-center">
+                            <div class="col-md-5">
+                                <div class="card h-100 cursor-pointer"
+                                     :class="budgetMode === 'free_only' ? 'border-success shadow' : 'border-light'"
+                                     @click="budgetMode = 'free_only'">
+                                    <div class="card-body text-center p-4">
+                                        <i class="bi bi-currency-dollar display-4 text-success"></i>
+                                        <h5 class="mt-3">Free Resources Only</h5>
+                                        <p class="text-muted small">Show only free courses, videos, and tutorials</p>
+                                        <div x-show="budgetMode === 'free_only'">
+                                            <span class="badge bg-success">Selected</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="card h-100 cursor-pointer"
+                                     :class="budgetMode === 'free_and_paid' ? 'border-primary shadow' : 'border-light'"
+                                     @click="budgetMode = 'free_and_paid'">
+                                    <div class="card-body text-center p-4">
+                                        <i class="bi bi-stars display-4 text-primary"></i>
+                                        <h5 class="mt-3">Best Quality</h5>
+                                        <p class="text-muted small">Show both free and paid premium resources</p>
+                                        <div x-show="budgetMode === 'free_and_paid'">
+                                            <span class="badge bg-primary">Selected</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Learning Style -->
+                    <div x-show="step === 3" x-transition x-cloak>
+                        <div class="text-center mb-4">
+                            <h3>How do you learn best?</h3>
+                            <p class="text-muted">We'll prioritize resources that match your style</p>
+                        </div>
+                        
+                        <div class="row g-3 justify-content-center">
+                            {% for value, label in learning_styles %}
+                            <div class="col-md-3">
+                                <div class="card cursor-pointer"
+                                     :class="learningStyle === '{{ value }}' ? 'border-info shadow' : 'border-light'"
+                                     @click="learningStyle = '{{ value }}'">
+                                    <div class="card-body text-center p-3">
+                                        <i class="bi 
+                                            {% if value == 'video' %}bi-play-circle{% endif %}
+                                            {% if value == 'text' %}bi-book{% endif %}
+                                            {% if value == 'interactive' %}bi-laptop{% endif %}
+                                            {% if value == 'mixed' %}bi-collection{% endif %}
+                                        display-5" :class="learningStyle === '{{ value }}' ? 'text-info' : 'text-muted'"></i>
+                                        <h6 class="mt-2 mb-0">{{ label }}</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation Buttons -->
+                    <div class="d-flex justify-content-between mt-5">
+                        <button class="btn btn-outline-secondary" 
+                                @click="step = Math.max(1, step - 1)"
+                                x-show="step > 1"
+                                x-transition>
+                            <i class="bi bi-arrow-left me-2"></i>Back
+                        </button>
+                        <div></div>
+                        <button class="btn btn-primary" 
+                                @click="step < 3 ? step++ : document.getElementById('career-form').submit()"
+                                :disabled="step === 1 && !selectedGoal">
+                            <span x-show="step < 3">Next<i class="bi bi-arrow-right ms-2"></i></span>
+                            <span x-show="step === 3">Finish<i class="bi bi-check-lg ms-2"></i></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hidden Form -->
+            <form id="career-form" method="post" class="d-none">
+                {% csrf_token %}
+                <input type="hidden" name="career_goal" :value="selectedGoal">
+                <input type="hidden" name="budget_mode" :value="budgetMode">
+                <input type="hidden" name="learning_style" :value="learningStyle">
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
